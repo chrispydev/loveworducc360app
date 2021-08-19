@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "loveworlducc360",
+    "slug": "loveworlducc360",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./app/assets/UCCNEW.png",
+    "splash": {
+      "image": "./app/assets/UCCNEW.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./app/assets/UCCNEW.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./app/assets/sound/pristine-609.mp3"
+          ],
+          "mode": "production"
+        }
+      ]
+    ],
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./app/assets/UCCNEW.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "blwuccapp.expo.exponent"
+    },
+    "web": {
+      "favicon": "./app/assets/favicon.png"
+    },
+    "description": ""
+  }
+}

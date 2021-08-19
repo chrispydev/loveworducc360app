@@ -1,0 +1,25 @@
+
+blwuccadmin/node_modules
+client/node_modules
+blwuccadownload/node_modules
+blwuccattendance/node_modules
+blwuccchart/node_modules
+blwuccadmin/.expo/
+client/.expo/
+npm-debug.*
+client/*.jks
+/client/*.p8
+/blwuccadmin/*.p8
+/client/*.p12
+/blwuccadmin/*.p12
+/client/*.key
+/blwuccadmin/*.key
+/client/*.mobileprovision
+/blwuccadmin/*.mobileprovision
+/client/*.orig.*
+/blwuccadmin/*.orig.*
+web-build/
+
+# macOS
+client/.DS_Store
+blwuccadmin/.DS_Store

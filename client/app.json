@@ -14,6 +14,7 @@
     "plugins": [
       [
         "expo-notifications",
+       
         {
           "icon": "./app/assets/UCCNEW.png",
           "color": "#ffffff",
@@ -38,6 +39,7 @@
         "foregroundImage": "./app/assets/UCCNEW.png",
         "backgroundColor": "#FFFFFF"
       },
+      "googleServicesFile": "./google-services.json",
       "package": "blwuccapp.expo.exponent"
     },
     "web": {

@@ -102,9 +102,9 @@ export default function Members({ navigation }) {
                 </TouchableOpacity>
               </View>
               <View style={{ flex: 1, marginLeft: 30, padding: 10 }}>
-                {users.map((user, index) => (
+                {users.map((user, id) => (
                   <>
-                    <AccordionListItem key={index} user={user.data} />
+                    <AccordionListItem id={id} user={user.data} />
                   </>
                 ))}
               </View>

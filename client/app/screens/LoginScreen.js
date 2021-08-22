@@ -9,6 +9,8 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Image,
+  Platform,
+  ImageBackground,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts } from 'expo-font';
@@ -97,7 +99,20 @@ const Login = ({ navigation }) => {
           <Text style={styles.welcomeText}>Welcome to Church</Text>
         </View>
         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-          <Image style={styles.logo} source={require('../assets/logo1.png')} />
+          {Platform.os === 'android' || Platform.os === 'ios' ? (
+            <Image
+              style={styles.logo}
+              source={require('../assets/logo1.png')}
+            />
+          ) : (
+            <View style={{ width: 200, height: 200 }}>
+              <ImageBackground
+                source={require('../assets/logo1.png')}
+                resizeMode="cover"
+                style={{ width: 200, height: 200 }}
+              ></ImageBackground>
+            </View>
+          )}
         </View>
         {/* <View
           style={{

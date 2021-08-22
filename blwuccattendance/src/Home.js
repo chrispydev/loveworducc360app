@@ -47,7 +47,8 @@ export function Home() {
       weekday[6] = 'Saturday';
 
       // db.collection(`SundayService`)
-      db.collection(`${weekday[d.getDay()]}Service`)
+      // db.collection(`Sunday${d.getDate()}Service`)
+      db.collection(`${weekday[d.getDay()]}${d.getDate()}Service`)
         .add({
           email: email,
           data: registered.map((service) => service.data) || [],

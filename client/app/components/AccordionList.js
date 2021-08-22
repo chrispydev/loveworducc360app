@@ -4,13 +4,12 @@ import { ListItem, Avatar } from 'react-native-elements';
 import { TouchableOpacity, SafeAreaView } from 'react-native';
 import { View } from 'react-native';
 
-const AccordionListItem = ({ user, index }) => {
+const AccordionListItem = ({ user, id }) => {
   const [show, setShow] = useState(false);
- 
 
   return (
     <>
-      <View key={index}>
+      <View key={id}>
         <TouchableOpacity onPress={() => setShow(!show)}>
           <ListItem
             bottomDivider
@@ -65,6 +64,9 @@ const AccordionListItem = ({ user, index }) => {
                 </ListItem.Subtitle>
                 <ListItem.Subtitle style={{ fontWeight: 'bold' }}>
                   {user?.hall_Hostel}
+                </ListItem.Subtitle>
+                <ListItem.Subtitle style={{ fontWeight: 'bold' }}>
+                  {user?.room_number}
                 </ListItem.Subtitle>
                 <ListItem.Subtitle style={{ fontWeight: 'bold' }}>
                   {user?.fellowship}

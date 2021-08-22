@@ -16,7 +16,7 @@ import { useFonts } from 'expo-font';
 import firebase from '../firebase/Firebase';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-export default function AskPastorQuestionScreen() {
+export default function AskPastorQuestionScreen({ navigation }) {
   const [show, setShow] = useState(false);
   const [askPastor, setAskPastor] = useState('');
 
@@ -94,11 +94,12 @@ export default function AskPastorQuestionScreen() {
             </>
           )}
           <TextInput
+            value={askPastor}
             onChangeText={(askPastor) => setAskPastor(askPastor)}
             style={styles.askPastorStyle}
             editable
-            maxLength={40}
             placeholder="Type your question here"
+            onSubmitEditing={askPastorQuestion}
             placeholderTextColor="#fff"
           />
           <View

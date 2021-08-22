@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   drawerText: {
     color: 'white',
-    fontSize: 25,
+    fontSize: RFValue(16, 375),
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },

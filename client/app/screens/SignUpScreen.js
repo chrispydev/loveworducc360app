@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Platform,
+  ImageBackground,
 } from 'react-native';
 import { Button } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -34,6 +36,7 @@ const SignUp = ({ navigation }) => {
   const [hallHostel, setHallHostel] = useState('');
   const [selectedFellowShip, setSelectedFellowShip] = useState();
   const [date, setDate] = useState([]);
+  const [dateType, setDateType] = useState('');
   const [password, setPassword] = useState('');
   const [imageUrl, setImageUrl] = useState(null);
   const [secure, setSecure] = useState(true);
@@ -62,14 +65,18 @@ const SignUp = ({ navigation }) => {
       photoURL: imageUrl || 'https://www.w3schools.com/w3images/avatar2.png',
     });
 
-    firebase.firestore().collection('profile').doc(name).set({
-      full_name: name,
-      email_address: email,
-      hall_Hostel: hallHostel,
-      fellowship: selectedFellowShip,
-      phone_number: phone,
-      date_of_birth: date,
-    });
+    firebase
+      .firestore()
+      .collection('profile')
+      .doc(name)
+      .set({
+        full_name: name,
+        email_address: email,
+        hall_Hostel: hallHostel,
+        fellowship: selectedFellowShip,
+        phone_number: phone,
+        date_of_birth: date || dateType,
+      });
 
     // firebase.firestore().collection('attended').add({
     //   displayName: name,
@@ -102,129 +109,140 @@ const SignUp = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView behavior="height" style={styles.container}>
-      <SafeAreaView>
-        <ScrollView>
-          <StatusBar style="auto" />
-          <View style={styles.welcome}>
-            <Text style={styles.welcomeText}>Welcome to Church</Text>
-          </View>
-          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+      {/* <SafeAreaView> */}
+      <ScrollView>
+        <StatusBar style="auto" />
+        <View style={styles.welcome}>
+          <Text style={styles.welcomeText}>Welcome to Church</Text>
+        </View>
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+          {Platform.os === 'android' || Platform.os === 'ios' ? (
             <Image
               style={styles.logo}
               source={require('../assets/logo1.png')}
             />
-          </View>
-          {show === true && (
-            <>
-              <View
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  zIndex: 2,
-                  width: '100%',
-                  height: '100%',
-                }}
-              >
-                <Spinner
-                  visible={show}
-                  color="#bd69db"
-                  // textContent={'Loading...'}
-                  textStyle={{ color: 'white', fontSize: 20 }}
-                />
-              </View>
-            </>
+          ) : (
+            <View style={{ width: 200, height: 200 }}>
+              <ImageBackground
+                source={require('../assets/logo1.png')}
+                resizeMode="cover"
+                style={{ width: 200, height: 200 }}
+              ></ImageBackground>
+            </View>
           )}
-          <View style={{ marginBottom: 25 }}>
-            <Text style={{ color: 'white', paddingBottom: 10, fontSize: 16 }}>
-              Full Name
-            </Text>
-            <TextInput
-              style={styles.input}
-              // autoFocus={true}
-              placeholderTextColor="white"
-              value={name}
-              placeholder="Enter your full name"
-              onChangeText={(name) => setName(name)}
-            />
-          </View>
-          <View style={{ marginBottom: 25 }}>
-            <Text style={{ color: 'white', paddingBottom: 10, fontSize: 16 }}>
-              Phone Number
-            </Text>
-            <TextInput
-              style={styles.input}
-              // autoFocus={true}
-              placeholderTextColor="white"
-              autoCompleteType="tel"
-              keyboardType="phone-pad"
-              value={phone}
-              placeholder="Enter your contact"
-              onChangeText={(phone) => setPhone(phone)}
-            />
-          </View>
-
-          <View style={{ marginBottom: 25 }}>
-            <Text style={{ color: 'white', paddingBottom: 20, fontSize: 16 }}>
-              Email
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholderTextColor="white"
-              value={email}
-              placeholder="Enter your email address"
-              onChangeText={(email) => setEmail(email)}
-            />
-          </View>
-          <View style={{ marginBottom: 25 }}>
-            <Text style={{ color: 'white', paddingBottom: 10, fontSize: 16 }}>
-              Hall or Hostel
-            </Text>
-            <TextInput
-              style={styles.input}
-              // autoFocus={true}
-              placeholderTextColor="white"
-              value={hallHostel}
-              placeholder="Enter your Hall or Hostel"
-              onChangeText={(hallHostel) => setHallHostel(hallHostel)}
-            />
-          </View>
-          <View style={{ marginBottom: 25 }}>
-            <Text style={{ color: 'white', paddingBottom: 10, fontSize: 16 }}>
-              Fellowship
-            </Text>
+        </View>
+        {show === true && (
+          <>
             <View
               style={{
-                borderColor: '#555',
-                borderWidth: 1,
-                borderRadius: 25,
-                color: '#fff',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                zIndex: 2,
+                width: '100%',
+                height: '100%',
               }}
             >
-              <Picker
-                style={{ color: 'white' }}
-                dropdownIconColor="white"
-                itemStyle={{ fontSize: 30 }}
-                selectedValue={selectedFellowShip}
-                onValueChange={(itemValue, itemIndex) =>
-                  setSelectedFellowShip(itemValue)
-                }
-              >
-                <Picker.Item
-                  label="Choose your fellowship"
-                  value="Choose your fellowship"
-                />
-                <Picker.Item label="Mimshack" value="mimshack" />
-                <Picker.Item label="Ambassadors" value="ambassadors" />
-                <Picker.Item label="loveworld Generals" value="loveworld" />
-                <Picker.Item label="Pleroma " value="pleroma" />
-                <Picker.Item label="Avans Guards " value="avans" />
-              </Picker>
+              <Spinner
+                visible={show}
+                color="#bd69db"
+                // textContent={'Loading...'}
+                textStyle={{ color: 'white', fontSize: 20 }}
+              />
             </View>
-          </View>
-          {/* <Text>{console.log(phone)}</Text> */}
+          </>
+        )}
+        <View style={{ marginBottom: 25 }}>
+          <Text style={{ color: 'white', paddingBottom: 10, fontSize: 16 }}>
+            Full Name
+          </Text>
+          <TextInput
+            style={styles.input}
+            // autoFocus={true}
+            placeholderTextColor="white"
+            value={name}
+            placeholder="Enter your full name"
+            onChangeText={(name) => setName(name)}
+          />
+        </View>
+        <View style={{ marginBottom: 25 }}>
+          <Text style={{ color: 'white', paddingBottom: 10, fontSize: 16 }}>
+            Phone Number
+          </Text>
+          <TextInput
+            style={styles.input}
+            // autoFocus={true}
+            placeholderTextColor="white"
+            autoCompleteType="tel"
+            keyboardType="phone-pad"
+            value={phone}
+            placeholder="Enter your contact"
+            onChangeText={(phone) => setPhone(phone)}
+          />
+        </View>
 
-          {/* <Text>{console.log(`new date ${date}`)}</Text> */}
+        <View style={{ marginBottom: 25 }}>
+          <Text style={{ color: 'white', paddingBottom: 20, fontSize: 16 }}>
+            Email
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholderTextColor="white"
+            value={email}
+            placeholder="Enter your email address"
+            onChangeText={(email) => setEmail(email)}
+          />
+        </View>
+        <View style={{ marginBottom: 25 }}>
+          <Text style={{ color: 'white', paddingBottom: 10, fontSize: 16 }}>
+            Hall or Hostel
+          </Text>
+          <TextInput
+            style={styles.input}
+            // autoFocus={true}
+            placeholderTextColor="white"
+            value={hallHostel}
+            placeholder="Enter your Hall or Hostel"
+            onChangeText={(hallHostel) => setHallHostel(hallHostel)}
+          />
+        </View>
+        <View style={{ marginBottom: 25 }}>
+          <Text style={{ color: 'white', paddingBottom: 10, fontSize: 16 }}>
+            Fellowship
+          </Text>
+          <View
+            style={{
+              borderColor: '#555',
+              borderWidth: 1,
+              borderRadius: 25,
+              color: '#fff',
+            }}
+          >
+            <Picker
+              style={{ color: 'white' }}
+              dropdownIconColor="white"
+              itemStyle={{ fontSize: 30 }}
+              selectedValue={selectedFellowShip}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedFellowShip(itemValue)
+              }
+            >
+              <Picker.Item
+                label="Choose your fellowship"
+                value="Choose your fellowship"
+              />
+              <Picker.Item label="Mimshack" value="mimshack" />
+              <Picker.Item label="Ambassadors" value="ambassadors" />
+              <Picker.Item label="loveworld Generals" value="loveworld" />
+              <Picker.Item label="Pleroma " value="pleroma" />
+              <Picker.Item label="Avans Guards " value="avans" />
+            </Picker>
+          </View>
+        </View>
+        {/* <Text>{console.log(phone)}</Text> */}
+
+        {/* <Text>{console.log(`new date ${date}`)}</Text> */}
+        {Platform.os === 'android' || Platform.os === 'ios' ? (
           <View style={styles.date}>
             <DatePicker
               isVisible={isDatePickerVisible}
@@ -244,55 +262,70 @@ const SignUp = ({ navigation }) => {
               title="Date of Birth "
             />
           </View>
-          {date.length > 0 ? (
-            <>
-              <View style={{ marginBottom: 25 }}>
-                <TextInput
-                  style={styles.input}
-                  // autoFocus={true}
-                  placeholderTextColor="white"
-                  value={date}
-                  placeholder="Your date of Birth"
-                  onChangeText={(name) => setName(name)}
-                />
-              </View>
-            </>
-          ) : null}
+        ) : (
           <View style={{ marginBottom: 25 }}>
-            <Text style={{ color: 'white', paddingBottom: 20, fontSize: 16 }}>
-              Password
+            <Text style={{ color: 'white', paddingBottom: 10, fontSize: 16 }}>
+              Date of Birth
             </Text>
-            <View
-              style={[
-                styles.input,
-                {
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingRight: 10,
-                },
-              ]}
-            >
+            <TextInput
+              style={styles.input}
+              // autoFocus={true}
+              placeholderTextColor="white"
+              value={dateType}
+              placeholder="20/20/20221"
+              onChangeText={(dateType) => setDateType(dateType)}
+            />
+          </View>
+        )}
+        {date.length > 0 ? (
+          <>
+            <View style={{ marginBottom: 25 }}>
               <TextInput
-                style={[styles.input1, { flex: 1 }]}
-                keyboardType="default"
-                value={password}
+                style={styles.input}
+                // autoFocus={true}
                 placeholderTextColor="white"
-                placeholder="Enter your  password"
-                secureTextEntry={secure}
-                onChangeText={(password) => setPassword(password)}
-              />
-              <Icon
-                iconStyle={{ padding: 10 }}
-                size={25}
-                type="font-awesome-5"
-                name={secure ? 'eye-slash' : 'eye'}
-                color="white"
-                onPress={() => setSecure(!secure)}
+                value={date}
+                placeholder="Your date of Birth"
+                onChangeText={(name) => setName(name)}
               />
             </View>
+          </>
+        ) : null}
+        <View style={{ marginBottom: 25 }}>
+          <Text style={{ color: 'white', paddingBottom: 20, fontSize: 16 }}>
+            Password
+          </Text>
+          <View
+            style={[
+              styles.input,
+              {
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingRight: 10,
+              },
+            ]}
+          >
+            <TextInput
+              style={[styles.input1, { flex: 1 }]}
+              keyboardType="default"
+              value={password}
+              placeholderTextColor="white"
+              placeholder="Enter your  password"
+              secureTextEntry={secure}
+              onChangeText={(password) => setPassword(password)}
+            />
+            <Icon
+              iconStyle={{ padding: 10 }}
+              size={25}
+              type="font-awesome-5"
+              name={secure ? 'eye-slash' : 'eye'}
+              color="white"
+              onPress={() => setSecure(!secure)}
+            />
           </View>
+        </View>
 
-          {/* <View
+        {/* <View
             style={{
               marginBottom: 25,
             }}
@@ -300,47 +333,44 @@ const SignUp = ({ navigation }) => {
             <NativeImagePicker imageUrl={imageUrl} pickImage={pickImage} />
           </View> */}
 
-          <View>
-            <TouchableOpacity
-              onPress={() => register()}
-              disabled={
-                name.length === 0 ||
-                email.length === 0 ||
-                password.length === 0 ||
-                date.length === 0
-                  ? true
-                  : false
-              }
+        <View>
+          <TouchableOpacity
+            onPress={() => register()}
+            disabled={
+              name.length === 0 || email.length === 0 || password.length === 0
+                ? true
+                : false
+            }
+          >
+            <LinearGradient
+              start={[0, 0.5]}
+              end={[1, 0.5]}
+              colors={['#bd69db', '#d55aaa']}
+              style={{ borderRadius: 25 }}
             >
-              <LinearGradient
-                start={[0, 0.5]}
-                end={[1, 0.5]}
-                colors={['#bd69db', '#d55aaa']}
-                style={{ borderRadius: 25 }}
-              >
-                <View style={styles.circleGradient}>
-                  <Text style={styles.visit}>Sign Up</Text>
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-            {/* <TouchableOpacity
+              <View style={styles.circleGradient}>
+                <Text style={styles.visit}>Sign Up</Text>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+          {/* <TouchableOpacity
               onPress={() => {
                 UploadImage();
               }}
             >
               <Text>Upload</Text>
             </TouchableOpacity> */}
-          </View>
-          <View style={styles.signUp}>
-            <Text style={styles.text}>Already have an account?</Text>
-            {/* () => navigation.navigate('signup') */}
-            <TouchableOpacity onPress={() => navigation.navigate('login')}>
-              <Text style={styles.text2}>Log in</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{ height: 100 }} />
-        </ScrollView>
-      </SafeAreaView>
+        </View>
+        <View style={styles.signUp}>
+          <Text style={styles.text}>Already have an account?</Text>
+          {/* () => navigation.navigate('signup') */}
+          <TouchableOpacity onPress={() => navigation.navigate('login')}>
+            <Text style={styles.text2}>Log in</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ height: 100 }} />
+      </ScrollView>
+      {/* </SafeAreaView> */}
     </KeyboardAvoidingView>
   );
 };

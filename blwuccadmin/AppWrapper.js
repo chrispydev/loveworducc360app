@@ -32,9 +32,9 @@ export default function AppWrapper() {
   const userobject = useSelector((state) => state.authentication.auth);
 
   React.useLayoutEffect(() => {
-    // if (Platform.os === 'android' || Platform.os === 'ios') {
-    LogBox.ignoreLogs(['Setting a timer']);
-    // }
+    if (Platform.os === 'android' || Platform.os === 'ios') {
+      LogBox.ignoreLogs(['Setting a timer']);
+    }
     // userObject();
     const unsubscribe = firebase.auth().onAuthStateChanged((authUser) => {
       if (authUser) {

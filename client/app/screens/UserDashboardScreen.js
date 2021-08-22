@@ -29,6 +29,9 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
   // setAttended
   const [sundayService, setSundayService] = useState([]);
   let sunday_service = useRef();
+  // setAttended
+  const [sunday21Service, setSunday21Service] = useState([]);
+  let sunday21_service = useRef();
   const [midWeekService, setMidWeekService] = useState([]);
   let midweek_service = useRef();
 
@@ -87,6 +90,16 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
         }))
       )
     );
+    const unsubscribe1 = db
+      .collection('Sunday21Service')
+      .onSnapshot((snapshot) =>
+        setSunday21Service(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+        )
+      );
 
     if (midWeekService)
       if (tithes.length === 0) {
@@ -180,6 +193,16 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
   }, [sundayService]);
 
   useEffect(() => {
+    const serviceAttended = sundayService.filter(({ id, data }) => {
+      if (data.email === auth.currentUser?.email) {
+        return true;
+      }
+    });
+    // console.log(serviceAttended);
+    sunday21_service.current = serviceAttended.length;
+  }, [sunday21Service]);
+
+  useEffect(() => {
     const serviceAttended = midWeekService.filter(({ id, data }) => {
       if (data.email === auth.currentUser?.email) {
         return true;
@@ -240,7 +263,7 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
           }}
         >
           <ServiceInfo
-            number={sunday_service?.current || 0}
+            number={sunday_service?.current + sunday21_service.current || 0}
             text="Sunday Services "
             icon="users"
           />

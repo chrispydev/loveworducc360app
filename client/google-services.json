@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "604213821161",
+    "project_id": "blwuccapp-56e5f",
+    "storage_bucket": "blwuccapp-56e5f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604213821161:android:2333d788194e208b90fa78",
+        "android_client_info": {
+          "package_name": "blwuccapp.expo.exponent"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "604213821161-b40qr8q60qcercp05hp7icejgt8jf8ok.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApknAOi5tJ_i7qSxehrLWYskU89Qpkn0U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "604213821161-b40qr8q60qcercp05hp7icejgt8jf8ok.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

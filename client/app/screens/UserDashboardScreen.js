@@ -91,7 +91,7 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
       )
     );
     const unsubscribe1 = db
-      .collection('Sunday21Service')
+      .collection('Sunday22Service')
       .onSnapshot((snapshot) =>
         setSunday21Service(
           snapshot.docs.map((doc) => ({

@@ -28,16 +28,14 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { db } from './Firebase/firebase';
 
-if (Platform.os === 'android' || Platform.os === 'ios') {
-  let messages;
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }),
-  });
-}
+let messages;
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 const Drawer = createDrawerNavigator();
 
@@ -52,9 +50,9 @@ export default function AppWrapper() {
   const userobject = useSelector((state) => state.authentication.auth);
 
   React.useLayoutEffect(() => {
-    if (Platform.os === 'android' || Platform.os === 'ios') {
-      LogBox.ignoreLogs(['Setting a timer']);
-    }
+    // if (Platform.os === 'android' || Platform.os === 'ios') {
+    LogBox.ignoreLogs(['Setting a timer']);
+    // }
     // userObject();
     const unsubscribe = firebase.auth().onAuthStateChanged((authUser) => {
       if (authUser) {
@@ -81,38 +79,38 @@ export default function AppWrapper() {
       );
   }, []);
 
-  // React.useEffect(() => {
-  //   async function getQuestion() {
-  //     const messages = questions[0];
-  //     await schedulePushNotification(messages.data.Question);
-  //   }
-  //   getQuestion();
-  // }, [questions]);
+  React.useEffect(() => {
+    async function getQuestion() {
+      const messages = questions[0];
+      await schedulePushNotification(messages.data.Question);
+    }
 
-  if (Platform.os === 'android' || Platform.os === 'ios') {
-    React.useEffect(() => {
-      registerForPushNotificationsAsync().then((token) =>
-        setExpoPushToken(token)
+    getQuestion();
+  }, [questions]);
+
+  React.useEffect(() => {
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        // console.log(response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
       );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
-      notificationListener.current =
-        Notifications.addNotificationReceivedListener((notification) => {
-          setNotification(notification);
-        });
-
-      responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {
-          // console.log(response);
-        });
-
-      return () => {
-        Notifications.removeNotificationSubscription(
-          notificationListener.current
-        );
-        Notifications.removeNotificationSubscription(responseListener.current);
-      };
-    }, []);
-  }
   let screens;
 
   userobject?.email
@@ -276,49 +274,46 @@ export default function AppWrapper() {
     </>
   );
 }
-if (Platform.os === 'android' || Platform.os === 'ios') {
-  async function schedulePushNotification(message) {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "You've got a message! 📬",
-        body: message,
-        data: { data: 'goes here' },
-        sound: 'pristine-609.mp3',
-      },
-      trigger: { seconds: 8 },
-    });
+
+async function schedulePushNotification(message) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "You've got a message! 📬",
+      body: message,
+      data: { data: 'goes here' },
+      sound: 'pristine-609.mp3',
+    },
+    trigger: { seconds: 4 },
+  });
+}
+
+async function registerForPushNotificationsAsync() {
+  let token;
+  if (Constants.isDevice) {
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+    // console.log(token);
+  } else {
+    alert('Must use physical device for Push Notifications');
   }
 
-  async function registerForPushNotificationsAsync() {
-    let token;
-    if (Constants.isDevice) {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notification!');
-        return;
-      }
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-      // console.log(token);
-    } else {
-      alert('Must use physical device for Push Notifications');
-    }
+  Notifications.setNotificationChannelAsync('BLWUCC', {
+    name: 'BLWUCC',
+    sound: 'pristine-609.mp3',
+    importance: Notifications.AndroidImportance.MAX,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: '#FF231F7C',
+  });
 
-    if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('BLWUCC', {
-        name: 'BLWUCC',
-        sound: 'pristine-609.mp3',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-
-    return token;
-  }
+  return token;
 }

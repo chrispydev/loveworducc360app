@@ -26,7 +26,7 @@ const Home = ({ navigation }) => {
         <Text style={styles.welcomeText}>Welcome to Church</Text>
       </View>
       <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Image style={styles.logo} source={require('../assets/logo1.png')} />
+        <Image style={styles.logo} source={require('../assets/UCCNEW.png')} />
       </View>
       <CarouselSlide navigation={navigation} />
     </SafeAreaView>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -9,7 +9,7 @@ import {
 // import NetInfo from '@react-native-community/netinfo';
 
 import Header from '../components/Header';
-import PieCharts from '../components/PieChats';
+// import PieCharts from '../components/PieChats';
 import ServiceInfo from '../components/ServiceInfo';
 import { auth, db } from '../../Firebase/firebase';
 
@@ -29,9 +29,7 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
   // setAttended
   const [sundayService, setSundayService] = useState([]);
   let sunday_service = useRef();
-  // setAttended
-  const [sunday21Service, setSunday21Service] = useState([]);
-  let sunday21_service = useRef();
+
   const [midWeekService, setMidWeekService] = useState([]);
   let midweek_service = useRef();
 
@@ -46,13 +44,17 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
     setRefreshing(true);
     wait(2000).then(() => setRefreshing(false));
   }, []);
-
-  // const currentUser = auth.currentUser;
-
-  // currentUser.updateProfile({
-  //   photoURL:
-  //     'https://firebasestorage.googleapis.com/v0/b/blwuccapp-56e5f.appspot.com/o/images%2F2021-08-15T06%3A20%3A09.490Z?alt=media&token=4bbaf7cd-d4ca-446c-a0ee-677cd20d3174',
-  // });
+  // console.log(sundayService.length);
+  // useEffect(() => {
+  //   sundayService?.map((information) =>
+  //     db.collection('sundayservices').add({
+  //       email: information.data.email,
+  //       data: information.data.data,
+  //       timestamp: 'Old1',
+  //     })
+  //   );
+  //   console.log(`This is ${sundayService.length}`);
+  // }, []);
 
   useEffect(() => {
     const unsubscribePartnership = db
@@ -82,7 +84,7 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
   }, [route]);
 
   useEffect(() => {
-    const unsubscribe = db.collection('SundayService').onSnapshot((snapshot) =>
+    const unsubscribe = db.collection('sundayservices').onSnapshot((snapshot) =>
       setSundayService(
         snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -90,16 +92,6 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
         }))
       )
     );
-    const unsubscribe1 = db
-      .collection('Sunday22Service')
-      .onSnapshot((snapshot) =>
-        setSunday21Service(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            data: doc.data(),
-          }))
-        )
-      );
 
     if (midWeekService)
       if (tithes.length === 0) {
@@ -193,16 +185,6 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
   }, [sundayService]);
 
   useEffect(() => {
-    const serviceAttended = sundayService.filter(({ id, data }) => {
-      if (data.email === auth.currentUser?.email) {
-        return true;
-      }
-    });
-    // console.log(serviceAttended);
-    sunday21_service.current = serviceAttended.length;
-  }, [sunday21Service]);
-
-  useEffect(() => {
     const serviceAttended = midWeekService.filter(({ id, data }) => {
       if (data.email === auth.currentUser?.email) {
         return true;
@@ -263,7 +245,7 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
           }}
         >
           <ServiceInfo
-            number={sunday_service?.current + sunday21_service.current || 0}
+            number={sunday_service?.current || 0}
             text="Sunday Services "
             icon="users"
           />

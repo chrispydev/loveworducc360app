@@ -114,8 +114,9 @@ export default function SettingsScreen({ navigation }) {
             });
             setShow(false);
             setImageUrl(null);
-            alert('Profile picture updated');
             setUploading(false);
+            onRefresh();
+            alert('Profile picture updated');
             blob.close();
             return url;
           })

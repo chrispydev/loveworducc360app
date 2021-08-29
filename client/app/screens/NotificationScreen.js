@@ -17,16 +17,14 @@ import { auth, db } from '../../Firebase/firebase';
 import { StyleSheet, RefreshControl } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 
-if (Platform.OS === 'android' || Platform.OS === 'ios') {
-  let messages;
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }),
-  });
-}
+let messages;
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 const wait = (timeout) => {
   return new Promise((resolve) => setTimeout(resolve, timeout));
@@ -66,38 +64,36 @@ export default function NotificationScreen({ navigation, route }) {
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
-  if (Platform.OS === 'android' || Platform.OS === 'ios') {
-    useEffect(() => {
-      async function getQuestion() {
-        const messages = questions[0];
-        await schedulePushNotification(messages.data.Question);
-      }
-      getQuestion();
-    }, [questions]);
+  useEffect(() => {
+    async function getQuestion() {
+      const messages = questions[0];
+      await schedulePushNotification(messages.data.Question);
+    }
+    getQuestion();
+  }, [questions]);
 
-    useEffect(() => {
-      registerForPushNotificationsAsync().then((token) =>
-        setExpoPushToken(token)
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        // console.log(response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
       );
-
-      notificationListener.current =
-        Notifications.addNotificationReceivedListener((notification) => {
-          setNotification(notification);
-        });
-
-      responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {
-          // console.log(response);
-        });
-
-      return () => {
-        Notifications.removeNotificationSubscription(
-          notificationListener.current
-        );
-        Notifications.removeNotificationSubscription(responseListener.current);
-      };
-    }, []);
-  }
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   return (
     <KeyboardAvoidingView behavior="height">
@@ -174,49 +170,47 @@ const styles = StyleSheet.create({
   },
 });
 
-if (Platform.OS === 'ios' || Platform.OS === 'android') {
-  async function schedulePushNotification(message) {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "You've got a message! 📬",
-        body: message,
-        data: { data: 'goes here' },
-        sound: 'pristine-609.mp3',
-      },
-      trigger: { seconds: 8 },
+async function schedulePushNotification(message) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "You've got a message! 📬",
+      body: message,
+      data: { data: 'goes here' },
+      sound: 'pristine-609.mp3',
+    },
+    trigger: { seconds: 8 },
+  });
+}
+
+async function registerForPushNotificationsAsync() {
+  let token;
+  if (Constants.isDevice) {
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+    // console.log(token);
+  } else {
+    alert('Must use physical device for Push Notifications');
+  }
+
+  if (Platform.OS === 'android') {
+    Notifications.setNotificationChannelAsync('BLWUCC', {
+      name: 'BLWUCC',
+      sound: 'pristine-609.mp3',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
     });
   }
 
-  async function registerForPushNotificationsAsync() {
-    let token;
-    if (Constants.isDevice) {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notification!');
-        return;
-      }
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-      // console.log(token);
-    } else {
-      alert('Must use physical device for Push Notifications');
-    }
-
-    if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('BLWUCC', {
-        name: 'BLWUCC',
-        sound: 'pristine-609.mp3',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-
-    return token;
-  }
+  return token;
 }

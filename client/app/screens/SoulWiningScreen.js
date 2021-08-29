@@ -75,7 +75,7 @@ export default function SoulWiningScreen({ navigation }) {
       <ScrollView>
         <StatusBar style="auto" />
         <View style={{ flexDirection: 'row' }}>
-          <View style={{ marginRight: 30, marginTop: 10, flex: 1 }}>
+          <View style={{ marginLeft: -40, marginTop: 10, flex: 1 }}>
             <TouchableOpacity>
               <Icon
                 onPress={() => navigation.openDrawer()}
@@ -83,7 +83,6 @@ export default function SoulWiningScreen({ navigation }) {
                 name="bars"
                 size={30}
                 color="#fff"
-                iconStyle={styles.icon1}
               />
             </TouchableOpacity>
           </View>
@@ -215,7 +214,7 @@ const styles = StyleSheet.create({
   welcomeText: {
     color: 'white',
     textAlign: 'center',
-    fontSize: 40,
+    fontSize: 35,
     fontFamily: 'Pattaya',
   },
   input: {

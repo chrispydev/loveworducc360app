@@ -102,12 +102,12 @@ const Login = ({ navigation }) => {
           {Platform.os === 'android' || Platform.os === 'ios' ? (
             <Image
               style={styles.logo}
-              source={require('../assets/logo1.png')}
+              source={require('../assets/UCCNEW.png')}
             />
           ) : (
             <View style={{ width: 200, height: 200 }}>
               <ImageBackground
-                source={require('../assets/logo1.png')}
+                source={require('../assets/UCCNEW.png')}
                 resizeMode="cover"
                 style={{ width: 200, height: 200 }}
               ></ImageBackground>

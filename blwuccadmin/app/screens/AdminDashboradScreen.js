@@ -87,7 +87,7 @@ const AdminDashboradScreen = ({ navigation, route }) => {
   }, [navigation]);
 
   useEffect(() => {
-    const unsubscribe = db.collection('SundayService').onSnapshot((snapshot) =>
+    const unsubscribe = db.collection('sundayservices').onSnapshot((snapshot) =>
       setSundayService(
         snapshot.docs.map((doc) => ({
           id: doc.id,

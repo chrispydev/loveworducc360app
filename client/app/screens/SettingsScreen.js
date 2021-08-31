@@ -76,7 +76,7 @@ export default function SettingsScreen({ navigation }) {
 
     const ref = firebase
       .storage()
-      .ref('images')
+      .ref(`images/${auth.currentUser.displayName}`)
       .child(new Date().toISOString());
     const snapshot = ref.put(blob);
 
@@ -125,6 +125,7 @@ export default function SettingsScreen({ navigation }) {
           });
       }
     );
+    setShow(false);
   };
 
   useEffect(() => {
@@ -171,7 +172,7 @@ export default function SettingsScreen({ navigation }) {
                   visible={false}
                   size="large"
                   color="#bd69db"
-                  // textContent={'Loading...'}
+                  // textContent={'Loading...lllllll'}
                   textStyle={{ color: 'white', fontSize: 25 }}
                 />
               </View>
@@ -274,6 +275,7 @@ export default function SettingsScreen({ navigation }) {
                     justifyContent: 'space-around',
                     alignItems: 'center',
                     marginTop: 7,
+                    paddingBottom: 30,
                   }}
                 >
                   <Icon
@@ -314,7 +316,7 @@ const styles = StyleSheet.create({
     height: 320,
     position: 'relative',
     top: 0,
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   avatar: {
     flexDirection: 'row',

@@ -16,17 +16,25 @@ import ServiceInfo from '../components/ServiceInfo';
 import SoulsCard from '../components/SoulsCard';
 import firebase from '../firebase/Firebase';
 import { auth, db } from '../../firebase/firebase';
+import { Picker } from 'react-native';
 
 const wait = (timeout) => {
   return new Promise((resolve) => setTimeout(resolve, timeout));
 };
 
 const AdminDashboradScreen = ({ navigation, route }) => {
-  // setAttended
+  // Sunday Service
   const [sundayService, setSundayService] = useState([]);
-  let sunday_service = useRef();
+  let sunday_service = useRef([]);
+
+  // Midweek Service
   const [midWeekService, setMidWeekService] = useState([]);
   let midweek_service = useRef();
+
+  // friday Service
+  const [fridayPrayerServices, setFridayPrayerServices] = useState([]);
+  let friday_service = useRef();
+
   const [profile, setProfile] = useState([]);
   const [soulsWon, setSoulsWon] = useState([]);
   // partnership
@@ -96,17 +104,16 @@ const AdminDashboradScreen = ({ navigation, route }) => {
       )
     );
 
-    if (midWeekService)
-      if (tithes.length === 0) {
-        db.collection('Tithe').onSnapshot((snapshot) =>
-          setTithes(
-            snapshot.docs.map((doc) => ({
-              id: doc.id,
-              data: doc.data(),
-            }))
-          )
-        );
-      }
+    if (tithes.length === 0) {
+      db.collection('Tithe').onSnapshot((snapshot) =>
+        setTithes(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+        )
+      );
+    }
     return () => {
       unsubscribe;
     };
@@ -114,7 +121,7 @@ const AdminDashboradScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     const unsubscribe = db
-      .collection('WednesdayService')
+      .collection('midweekservices')
       .onSnapshot((snapshot) =>
         setMidWeekService(
           snapshot.docs.map((doc) => ({
@@ -125,7 +132,7 @@ const AdminDashboradScreen = ({ navigation, route }) => {
       );
 
     if (sundayService.length === 0) {
-      db.collection('SundayService').onSnapshot((snapshot) =>
+      db.collection('sundayservices').onSnapshot((snapshot) =>
         setSundayService(
           snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -141,6 +148,17 @@ const AdminDashboradScreen = ({ navigation, route }) => {
   }, [route]);
 
   useEffect(() => {
+    db.collection('fridayprayerservices').onSnapshot((snapshot) =>
+      setFridayPrayerServices(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }))
+      )
+    );
+  }, [navigation]);
+
+  useEffect(() => {
     db.collection('Tithe').onSnapshot((snapshot) =>
       setTithes(
         snapshot.docs.map((doc) => ({
@@ -152,20 +170,66 @@ const AdminDashboradScreen = ({ navigation, route }) => {
   }, [navigation]);
 
   useEffect(() => {
-    const serviceAttended = sundayService.map(({ id, data }) => {
-      data;
+    let sunday_dates = [];
+    let sunday_duplicate = [];
+    let serviceAttended = [];
+    sundayService.map((attend) => sunday_dates.push(attend.data.timestamp));
+
+    sunday_dates.forEach((item) => {
+      if (!sunday_duplicate.includes(item)) {
+        sunday_duplicate.push(item);
+      }
     });
-    // console.log(serviceAttended);
+
+    serviceAttended = sundayService.filter(({ id, data }) => {
+      if (data.timestamp === sunday_duplicate[0]) {
+        return true;
+      }
+    });
     sunday_service.current = serviceAttended.length;
   }, [sundayService]);
 
   useEffect(() => {
-    const serviceAttended = midWeekService.map(({ id, data }) => {
-      data;
+    let sunday_dates = [];
+    let sunday_duplicate = [];
+    let serviceAttended = [];
+    midWeekService.map((attend) => sunday_dates.push(attend.data.timestamp));
+
+    sunday_dates.forEach((item) => {
+      if (!sunday_duplicate.includes(item)) {
+        sunday_duplicate.push(item);
+      }
     });
-    // console.log(serviceAttended);
+
+    serviceAttended = midWeekService.filter(({ id, data }) => {
+      if (data.timestamp === sunday_duplicate[0]) {
+        return true;
+      }
+    });
     midweek_service.current = serviceAttended.length;
   }, [midWeekService]);
+
+  useEffect(() => {
+    let sunday_dates = [];
+    let sunday_duplicate = [];
+    let serviceAttended = [];
+    fridayPrayerServices.map((attend) =>
+      sunday_dates.push(attend.data.timestamp)
+    );
+
+    sunday_dates.forEach((item) => {
+      if (!sunday_duplicate.includes(item)) {
+        sunday_duplicate.push(item);
+      }
+    });
+
+    serviceAttended = fridayPrayerServices.filter(({ id, data }) => {
+      if (data.timestamp === sunday_duplicate[0]) {
+        return true;
+      }
+    });
+    friday_service.current = serviceAttended.length;
+  }, [fridayPrayerServices]);
 
   useEffect(() => {
     const reducer = (accumulator, currentValue) => accumulator + currentValue;
@@ -183,6 +247,7 @@ const AdminDashboradScreen = ({ navigation, route }) => {
     );
     currettithe.current = allGiving.reduce(reducer, 0);
   }, [tithes]);
+  // console.log(profile);
 
   return (
     <SafeAreaView>
@@ -214,35 +279,32 @@ const AdminDashboradScreen = ({ navigation, route }) => {
             text="Sunday Services "
             icon="users"
           />
-          {/* <ServiceInfo number={0} text="Sunday Service Missed" icon="plus" /> */}
+
           <ServiceInfo
             number={midweek_service?.current || 0}
-            text="Midweek service Attended"
-            icon="minus-square"
+            text="Midweek Services "
+            icon="users"
           />
-          {/* <ServiceInfo
-            number={0}
-            text="Midweek service missed"
-            icon="minus-square"
-          /> */}
-
+          <ServiceInfo
+            number={friday_service?.current || 0}
+            text="Friday Prayer Services "
+            icon="users"
+          />
           <ServiceInfo
             route="soulwining"
             navigation={navigation}
-            number={soulsWon.length}
+            number={soulsWon.length || 0}
             text="Total Soul Won"
             icon="plus-square"
           />
-
           <ServiceInfo
             navigation={navigation}
-            number={`GHC ${curretAmount.current}`}
+            number={`GHC ${curretAmount.current || 0}`}
             text="Total Partnership"
             icon="credit-card"
           />
-
           <ServiceInfo
-            number={`GHC ${currettithe.current}`}
+            number={`GHC ${currettithe.current || 0}`}
             text="Total Tithe"
             icon="credit-card"
           />

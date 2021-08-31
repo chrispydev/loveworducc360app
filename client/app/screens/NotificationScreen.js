@@ -64,13 +64,13 @@ export default function NotificationScreen({ navigation, route }) {
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
-  useEffect(() => {
-    async function getQuestion() {
-      const messages = questions[0];
-      await schedulePushNotification(messages.data.Question);
-    }
-    getQuestion();
-  }, [questions]);
+  // useEffect(() => {
+  //   async function getQuestion() {
+  //     const messages = questions[0];
+  //     await schedulePushNotification(messages.data.Question);
+  //   }
+  //   getQuestion();
+  // }, [questions]);
 
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) =>

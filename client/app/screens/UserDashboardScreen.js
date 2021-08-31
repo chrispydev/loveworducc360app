@@ -33,6 +33,9 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
   const [midWeekService, setMidWeekService] = useState([]);
   let midweek_service = useRef();
 
+  const [fridayAllNight, setFridayAllNight] = useState([]);
+  let friday_service = useRef();
+
   // soul
   const [soulsWon, setSoulsWon] = useState([]);
   let souls = useRef();
@@ -44,17 +47,18 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
     setRefreshing(true);
     wait(2000).then(() => setRefreshing(false));
   }, []);
-  // console.log(sundayService.length);
+
   // useEffect(() => {
-  //   sundayService?.map((information) =>
-  //     db.collection('sundayservices').add({
+  //   fridayAllNight?.map((information) =>
+  //     db.collection('fridayprayerservices').add({
   //       email: information.data.email,
   //       data: information.data.data,
-  //       timestamp: 'Old1',
+  //       timestamp: 'friday-15-8-2021',
   //     })
   //   );
-  //   console.log(`This is ${sundayService.length}`);
+  //   // console.log(`This is ${midWeekService.length}`);
   // }, []);
+  // console.log(`This is ${fridayAllNight.length}`);
 
   useEffect(() => {
     const unsubscribePartnership = db
@@ -84,6 +88,22 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
   }, [route]);
 
   useEffect(() => {
+    const unsubscribe = db
+      .collection('fridayprayerservices')
+      .onSnapshot((snapshot) =>
+        setFridayAllNight(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+        )
+      );
+
+    return () => {
+      unsubscribe;
+    };
+  }, [route]);
+  useEffect(() => {
     const unsubscribe = db.collection('sundayservices').onSnapshot((snapshot) =>
       setSundayService(
         snapshot.docs.map((doc) => ({
@@ -93,17 +113,16 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
       )
     );
 
-    if (midWeekService)
-      if (tithes.length === 0) {
-        db.collection('Tithe').onSnapshot((snapshot) =>
-          setTithes(
-            snapshot.docs.map((doc) => ({
-              id: doc.id,
-              data: doc.data(),
-            }))
-          )
-        );
-      }
+    if (midWeekService.length === 0) {
+      db.collection('midweekservices').onSnapshot((snapshot) =>
+        setMidWeekService(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+        )
+      );
+    }
     return () => {
       unsubscribe;
     };
@@ -111,7 +130,7 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     const unsubscribe = db
-      .collection('WednesdayService')
+      .collection('midweekservices')
       .onSnapshot((snapshot) =>
         setMidWeekService(
           snapshot.docs.map((doc) => ({
@@ -122,7 +141,7 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
       );
 
     if (sundayService.length === 0) {
-      db.collection('SundayService').onSnapshot((snapshot) =>
+      db.collection('sundayservices').onSnapshot((snapshot) =>
         setSundayService(
           snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -169,10 +188,17 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
         return true;
       }
     });
-    // console.log(auth.currentUser?.photoURL);
-    // console.log(serviceAttended);
     souls.current = serviceAttended.length;
   }, [soulsWon]);
+
+  useEffect(() => {
+    const serviceAttended = fridayAllNight.filter(({ id, data }) => {
+      if (data.email === auth.currentUser?.email) {
+        return true;
+      }
+    });
+    friday_service.current = serviceAttended.length;
+  }, [fridayAllNight]);
 
   useEffect(() => {
     const serviceAttended = sundayService.filter(({ id, data }) => {
@@ -180,7 +206,6 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
         return true;
       }
     });
-    // console.log(serviceAttended);
     sunday_service.current = serviceAttended.length;
   }, [sundayService]);
 
@@ -190,7 +215,6 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
         return true;
       }
     });
-    // console.log(serviceAttended);
     midweek_service.current = serviceAttended.length;
   }, [midWeekService]);
 
@@ -205,7 +229,6 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
     let current = [];
     amount.current?.map((money) => current.push(parseFloat(money.data.giving)));
     curretAmount.current = current.reduce(reducer, 0);
-    // console.log(curretAmount.current);
   }, [partnerships]);
 
   useEffect(() => {
@@ -253,7 +276,12 @@ const UserAdminDashboradScreen = ({ navigation, route }) => {
           <ServiceInfo
             number={midweek_service?.current || 0}
             text="Midweek service Attended"
-            icon="minus-square"
+            icon="plus-square"
+          />
+          <ServiceInfo
+            number={friday_service?.current || 0}
+            text="Friday service Attended"
+            icon="plus-square"
           />
           <ServiceInfo
             number={`GHC ${curretAmount.current}`}

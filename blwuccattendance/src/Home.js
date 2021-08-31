@@ -38,20 +38,28 @@ export function Home() {
     } else {
       var d = new Date();
       var weekday = new Array(7);
-      weekday[0] = 'Sunday';
-      weekday[1] = 'Monday';
-      weekday[2] = 'Tuesday';
-      weekday[3] = 'Wednesday';
-      weekday[4] = 'Thursday';
-      weekday[5] = 'Friday';
-      weekday[6] = 'Saturday';
+      weekday[0] = 'sunday';
+      weekday[1] = 'monday';
+      weekday[2] = 'tuesday';
+      weekday[3] = 'wednesday';
+      weekday[4] = 'thursday';
+      weekday[5] = 'friday';
+      weekday[6] = 'saturday';
 
-      db.collection(`${weekday[d.getDay()]}${d.getDate()}Service`);
+      // db.collection(`${weekday[d.getDay()]}${d.getDate()}Service`);
       // db.collection(`Sunday${d.getDate()}Service`)
-      db.collection(`sundayservices`)
+      // `${
+      // weekday[d.getDay()]
+      // }${d.getDate()}${d.getFullYear()}Service`,
+      // db.collection(`sundayservices`)
+      // timestamp: `wednesday-25-8-2021`,
+      db.collection(`midweekservices`)
         .add({
           email: email,
           data: registered.map((service) => service.data) || [],
+          timestamp: `${weekday[d.getDay()]}-${d.getDate()}-${
+            d.getMonth() + 1
+          }-${d.getFullYear()}`,
         })
         .then(() => {
           setEmail('');

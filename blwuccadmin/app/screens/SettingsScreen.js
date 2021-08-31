@@ -1,48 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  TextInput,
   StyleSheet,
+  Text,
+  View,
+  ImageBackground,
   KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Button } from 'react-native-elements';
-import * as ImagePicker from 'expo-image-picker';
-import { useDispatch } from 'react-redux';
-import Spinner from 'react-native-loading-spinner-overlay';
-
-import firebase from '../firebase/Firebase';
-
-import NativeImagePicker from '../components/ImagePicker';
-import { cleanUp } from '../redux/features/auth/userCacheSlice';
+import { Avatar } from 'react-native-elements';
 import { auth, db } from '../../firebase/firebase';
+import { RFValue } from 'react-native-responsive-fontsize';
 import { Icon } from 'react-native-elements';
+import { SimpleLineIcons } from '@expo/vector-icons';
+import ProfileInfoCard from '../components/ProfileInfoCard';
+import Spinner from 'react-native-loading-spinner-overlay';
+import firebase from '../firebase/Firebase';
+import * as ImagePicker from 'expo-image-picker';
+
+const wait = (timeout) => {
+  return new Promise((resolve) => setTimeout(resolve, timeout));
+};
 
 export default function SettingsScreen({ navigation }) {
-  const dispatch = useDispatch();
+  const [profile, setProfile] = useState([]);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [imageUrl, setImageUrl] = useState(null);
+  const [downloadUrl, setDownloadUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [hallHostel, setHallHostel] = useState('');
-  const [roomNumber, setRoomNumber] = useState('');
-  const [showHall, setShowHall] = useState(false);
-  const [showRoom, setShowRoom] = useState(false);
   const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = firebase.auth().onAuthStateChanged((authUser) => {
-      if (authUser) {
-      } else {
-        navigation.navigate('login');
-        dispatch(cleanUp());
-      }
-    });
-    return unsubscribe;
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -86,7 +76,7 @@ export default function SettingsScreen({ navigation }) {
 
     const ref = firebase
       .storage()
-      .ref('images')
+      .ref(`images/${auth.currentUser.displayName}`)
       .child(new Date().toISOString());
     const snapshot = ref.put(blob);
 
@@ -102,268 +92,245 @@ export default function SettingsScreen({ navigation }) {
         return;
       },
       () => {
-        snapshot.ref.getDownloadURL('profile/').then((url) => {
-          setUploading(false);
-          // console.log('download url: ', url);
-          blob.close();
-          return url;
-        });
+        snapshot.snapshot.ref
+          .getDownloadURL()
+          .then((url) => {
+            setDownloadUrl(url);
+            const user = auth.currentUser;
+            db.collection('profile')
+              .doc(user.displayName)
+              .update({
+                profileImage: url,
+              })
+              .then((docRef) => {})
+              .catch((error) => {
+                alert('Error adding document: ', error);
+              });
+
+            auth.onAuthStateChanged((authUser) => {
+              authUser.updateProfile({
+                photoURL: url,
+              });
+            });
+            setShow(false);
+            setImageUrl(null);
+            setUploading(false);
+            onRefresh();
+            alert('Profile picture updated');
+            blob.close();
+            return url;
+          })
+          .catch((error) => {
+            alert(error);
+          });
       }
     );
-
-    const user = firebase.auth().currentUser;
-    firebase
-      .firestore()
-      .collection('profile')
-      .doc(user.displayName)
-      .update({
-        profileImage: imageUrl,
-      })
-      .then((docRef) => {
-        setShow(false);
-        setImageUrl(null);
-        alert('Profile picture updated');
-      })
-      .catch((error) => {
-        alert('Error adding document: ', error);
-      });
-
-    auth.onAuthStateChanged((authUser) => {
-      authUser.updateProfile({
-        photoURL: imageUrl,
-      });
-    });
+    setShow(false);
   };
 
-  function updateHosel() {
-    setShow(true);
-    const user = firebase.auth().currentUser;
+  useEffect(() => {
+    db.collection('profile').onSnapshot((snapshot) =>
+      setProfile(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }))
+      )
+    );
+  }, [navigation]);
+  //   console.log(auth.currentUser.email);
 
-    firebase
-      .firestore()
-      .collection('profile')
-      .doc(user.displayName)
-      .update({
-        hall_Hostel: hallHostel,
-      })
-      .then((docRef) => {
-        setShow(false);
-        setShowHall(false);
-        alert('Hall or Hostel Updated');
-      })
-      .catch((error) => {
-        alert('Error adding document: ', error);
-      });
-  }
-
-  function updateRoom() {
-    setShow(true);
-    const user = firebase.auth().currentUser;
-
-    firebase
-      .firestore()
-      .collection('profile')
-      .doc(user.displayName)
-      .update({
-        room_number: roomNumber,
-      })
-      .then((docRef) => {
-        setShow(false);
-        setShowRoom(false);
-        alert('Room number Updated');
-      })
-      .catch((error) => {
-        alert('Error adding document: ', error);
-      });
-  }
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
 
   return (
-    <KeyboardAvoidingView behavior="position">
-      <ScrollView>
-        <SafeAreaView style={{ marginHorizontal: 10 }}>
-          <View style={{ margin: 10, flexDirection: 'row' }}>
-            <StatusBar style="auto" />
-            <View style={{ marginTop: 10 }}>
-              <TouchableOpacity>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <SafeAreaView>
+        <StatusBar style="auto" />
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {show === true && (
+            <>
+              <View
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  zIndex: 2,
+                  width: '100%',
+                  height: '100%',
+                }}
+              >
+                <Spinner
+                  visible={false}
+                  size="large"
+                  color="#bd69db"
+                  // textContent={'Loading...'}
+                  textStyle={{ color: 'white', fontSize: 25 }}
+                />
+              </View>
+            </>
+          )}
+          <View style={styles.backgroundWrapper}>
+            <ImageBackground
+              source={{ uri: 'https://www.w3schools.com/css/paris.jpg' }}
+              resizeMode="cover"
+              style={styles.image}
+            >
+              <TouchableOpacity style={{ width: 50, marginTop: 10 }}>
                 <Icon
                   onPress={() => navigation.openDrawer()}
                   type="font-awesome-5"
                   name="bars"
                   size={30}
-                  iconStyle={styles.icon1}
+                  color="white"
                 />
               </TouchableOpacity>
-            </View>
-            <View style={{ flex: 1, marginLeft: 30, padding: 10 }}>
-              <View
-                style={{
-                  marginBottom: 25,
-                  justifyContent: 'center',
-                }}
-              >
-                <NativeImagePicker imageUrl={imageUrl} pickImage={pickImage} />
-              </View>
-              {show === true && (
-                <>
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      zIndex: 2,
-                      width: '100%',
-                      height: '100%',
-                    }}
-                  >
-                    <Spinner
-                      visible={show}
-                      size="large"
-                      color="#bd69db"
-                      // textContent={'Loading...'}
-                      textStyle={{ color: 'white', fontSize: 25 }}
+              <View style={styles.avatar}>
+                {imageUrl ? (
+                  <>
+                    <Avatar
+                      rounded
+                      size={200}
+                      source={{ uri: imageUrl }}
+                      containerStyle={{ marginHorizontal: 10 }}
                     />
-                  </View>
-                </>
-              )}
-              {imageUrl && (
-                <>
-                  <View style={{ marginBottom: 10 }}>
-                    <TouchableOpacity onPress={UploadImage}>
-                      <LinearGradient
-                        start={[0, 0.5]}
-                        end={[1, 0.5]}
-                        colors={['#bd69db', '#d55bad']}
-                        style={{ borderRadius: 25 }}
-                      >
-                        <View style={styles.circleGradient}>
-                          <Text style={styles.visit}>Modify</Text>
-                        </View>
-                      </LinearGradient>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              )}
-              <View style={{ marginBottom: 10 }}>
-                <Button
-                  onPress={() => setShowHall(!showHall)}
-                  buttonStyle={{ borderRadius: 25 }}
-                  title="Modify your Hall or Hostel"
-                  type="solid"
-                />
-              </View>
-              {showHall && (
-                <>
-                  <View style={{ marginBottom: 25 }}>
-                    <TextInput
-                      style={styles.input}
-                      value={hallHostel}
-                      onSubmitEditing={updateHosel}
-                      placeholderTextColor="#000"
-                      placeholder="Modify your Hall or Hostel"
-                      onChangeText={(hallHostel) => setHallHostel(hallHostel)}
+                  </>
+                ) : (
+                  <>
+                    <Avatar
+                      rounded
+                      size={200}
+                      source={{ uri: auth?.currentUser?.photoURL }}
+                      containerStyle={{ marginHorizontal: 10 }}
                     />
-                  </View>
-                  <View style={{ marginBottom: 10 }}>
-                    <TouchableOpacity
-                      onPress={updateHosel}
-                      disabled={hallHostel.length === 0 ? true : false}
-                    >
-                      <LinearGradient
-                        start={[0, 0.5]}
-                        end={[1, 0.5]}
-                        colors={['#bd69db', '#d55bad']}
-                        style={{ borderRadius: 25 }}
-                      >
-                        <View style={styles.circleGradient}>
-                          <Text style={styles.visit}>Modify</Text>
-                        </View>
-                      </LinearGradient>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              )}
+                  </>
+                )}
 
-              <View style={{ marginBottom: 10 }}>
-                <Button
-                  onPress={() => setShowRoom(!showRoom)}
-                  buttonStyle={{ borderRadius: 25 }}
-                  title="Modify your room number"
-                  type="solid"
-                />
-              </View>
-              {showRoom && (
-                <>
-                  <View style={{ marginBottom: 25 }}>
-                    <TextInput
-                      style={styles.input}
-                      value={roomNumber}
-                      placeholderTextColor="#000"
-                      placeholder="Modify your room Number"
-                      onSubmitEditing={updateRoom}
-                      onChangeText={(roomNumber) => setRoomNumber(roomNumber)}
-                    />
-                  </View>
-                  <View style={{ marginBottom: 10 }}>
+                {imageUrl ? (
+                  <>
                     <TouchableOpacity
-                      onPress={updateRoom}
-                      disabled={roomNumber.length === 0 ? true : false}
+                      style={{
+                        position: 'absolute',
+                        backgroundColor: '#111',
+                        padding: 15,
+                        borderRadius: 100 / 2,
+                        bottom: 30,
+                        right: '20%',
+                      }}
+                      onPress={UploadImage}
+                      activeOpacity={0.5}
                     >
-                      <LinearGradient
-                        start={[0, 0.5]}
-                        end={[1, 0.5]}
-                        colors={['#bd69db', '#d55bad']}
-                        style={{ borderRadius: 25 }}
-                      >
-                        <View style={styles.circleGradient}>
-                          <Text style={styles.visit}>Modify</Text>
-                        </View>
-                      </LinearGradient>
+                      <Icon
+                        onPress={UploadImage}
+                        type="font-awesome-5"
+                        name="upload"
+                        size={24}
+                        color="white"
+                      />
                     </TouchableOpacity>
-                  </View>
-                </>
-              )}
-            </View>
+                  </>
+                ) : (
+                  <>
+                    <TouchableOpacity
+                      style={{
+                        position: 'absolute',
+                        backgroundColor: '#111',
+                        padding: 15,
+                        borderRadius: 100 / 2,
+                        bottom: 30,
+                        right: '20%',
+                      }}
+                      onPress={pickImage}
+                      activeOpacity={0.5}
+                    >
+                      <Icon
+                        onPress={pickImage}
+                        type="font-awesome-5"
+                        name="camera"
+                        size={24}
+                        color="white"
+                      />
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+              <View style={{ alignItems: 'center' }}>
+                {profile?.map(({ id, data }) =>
+                  data.email_address === auth?.currentUser.email ? (
+                    <Text style={styles.profileName}>{data.full_name}</Text>
+                  ) : null
+                )}
+
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                    marginTop: 7,
+                    paddingBottom: 30,
+                  }}
+                >
+                  <Icon
+                    name="map-marker-alt"
+                    type="font-awesome-5"
+                    color="#fff"
+                    size={20}
+                  />
+                  {profile?.map(({ id, data }) =>
+                    data.email_address === auth?.currentUser.email ? (
+                      <Text style={styles.profileLocate}>
+                        {data.hall_Hostel} - {data?.room_number}
+                      </Text>
+                    ) : null
+                  )}
+                </View>
+              </View>
+            </ImageBackground>
           </View>
-        </SafeAreaView>
-      </ScrollView>
+          <View>
+            {profile?.map(({ id, data }) =>
+              data.email_address === auth?.currentUser.email ? (
+                <ProfileInfoCard key={id} data={data} />
+              ) : null
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  input: {
-    height: 52,
-    borderRadius: 30,
-    paddingLeft: 20,
-    fontSize: 18,
-    color: '#000',
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#555',
-    textAlign: 'left',
+  container: {
+    flex: 1,
   },
-  input1: {
-    height: 52,
-    borderRadius: 30,
-    fontSize: 18,
-    color: '#FFFFFF',
-    borderWidth: 0,
-    borderColor: '#555',
-    textAlign: 'left',
+  backgroundWrapper: {
+    height: 320,
+    position: 'relative',
+    top: 0,
+    // marginBottom: 4,
   },
-  circleGradient: {
-    margin: 1,
-    height: 42,
+  avatar: {
+    flexDirection: 'row',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
-    borderRadius: 25,
+    // position: 'relative',
   },
-  visit: {
-    margin: 4,
-    textAlign: 'center',
-    backgroundColor: 'transparent',
+  image: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  profileLocate: {
     color: '#fff',
-    fontWeight: '800',
-    fontSize: 15,
+    fontSize: RFValue(15, 580),
+    marginLeft: 5,
   },
+  profileName: { color: '#fff', fontSize: RFValue(20, 580) },
 });

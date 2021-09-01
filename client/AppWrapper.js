@@ -20,7 +20,7 @@ import SoulWiningScreen from './app/screens/SoulWiningScreen';
 import AskPastorQuestionScreen from './app/screens/AskPastorQuestionScreen';
 import NotificationScreen from './app/screens/NotificationScreen';
 import ResetPasswordScreen from './app/screens/ResetPasswordScreen';
-// import Home from './app/screens/Home';
+import Home from './app/screens/Home';
 import { Icon } from 'react-native-elements';
 import UserDashboardScreen from './app/screens/UserDashboardScreen';
 // import QRCodeScanner from 'react-native-qrcode-scanner';
@@ -250,7 +250,7 @@ export default function AppWrapper() {
       ))
     : (screens = (
         <>
-          {/* <Drawer.Screen name="home" component={Home} /> */}
+          <Drawer.Screen name="home" component={Home} />
           <Drawer.Screen name="login" component={LoginScreen} />
           <Drawer.Screen name="signup" component={SignUpScreen} />
           <Drawer.Screen name="reset" component={ResetPasswordScreen} />

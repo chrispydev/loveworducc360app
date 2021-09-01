@@ -95,14 +95,17 @@ const AdminDashboradScreen = ({ navigation, route }) => {
   }, [navigation]);
 
   useEffect(() => {
-    const unsubscribe = db.collection('sundayservices').onSnapshot((snapshot) =>
-      setSundayService(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }))
-      )
-    );
+    const unsubscribe = db
+      .collection('sundayservices')
+      .orderBy('timestamp', 'asc')
+      .onSnapshot((snapshot) =>
+        setSundayService(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+        )
+      );
 
     if (tithes.length === 0) {
       db.collection('Tithe').onSnapshot((snapshot) =>
@@ -122,6 +125,7 @@ const AdminDashboradScreen = ({ navigation, route }) => {
   useEffect(() => {
     const unsubscribe = db
       .collection('midweekservices')
+      .orderBy('timestamp', 'asc')
       .onSnapshot((snapshot) =>
         setMidWeekService(
           snapshot.docs.map((doc) => ({
@@ -132,14 +136,16 @@ const AdminDashboradScreen = ({ navigation, route }) => {
       );
 
     if (sundayService.length === 0) {
-      db.collection('sundayservices').onSnapshot((snapshot) =>
-        setSundayService(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            data: doc.data(),
-          }))
-        )
-      );
+      db.collection('sundayservices')
+        .orderBy('timestamp', 'asc')
+        .onSnapshot((snapshot) =>
+          setSundayService(
+            snapshot.docs.map((doc) => ({
+              id: doc.id,
+              data: doc.data(),
+            }))
+          )
+        );
     }
 
     return () => {
@@ -148,14 +154,16 @@ const AdminDashboradScreen = ({ navigation, route }) => {
   }, [route]);
 
   useEffect(() => {
-    db.collection('fridayprayerservices').onSnapshot((snapshot) =>
-      setFridayPrayerServices(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }))
-      )
-    );
+    db.collection('fridayprayerservices')
+      .orderBy('timestamp', 'asc')
+      .onSnapshot((snapshot) =>
+        setFridayPrayerServices(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+        )
+      );
   }, [navigation]);
 
   useEffect(() => {
@@ -206,6 +214,7 @@ const AdminDashboradScreen = ({ navigation, route }) => {
         return true;
       }
     });
+    // console.log(serviceAttended);
     midweek_service.current = serviceAttended.length;
   }, [midWeekService]);
 

@@ -184,7 +184,7 @@ export default function SettingsScreen({ navigation }) {
               resizeMode="cover"
               style={styles.image}
             >
-              <TouchableOpacity style={{ width: 50, marginTop: 10 }}>
+              <TouchableOpacity style={{ width: 50, marginTop: 23 }}>
                 <Icon
                   onPress={() => navigation.openDrawer()}
                   type="font-awesome-5"
